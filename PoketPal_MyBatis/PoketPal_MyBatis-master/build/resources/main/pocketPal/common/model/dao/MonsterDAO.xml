@@ -1,0 +1,121 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+        PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "https://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="pocketPal.common.model.dao.MonsterDAO">
+    <resultMap id ="menuResultMap" type = "pocketPal.common.model.dto.MonsterDTO" >
+        <id property="palNo" column="PAL_NO"/>
+        <result property="palName" column="PAL_NAME"/>
+        <result property="palType" column="PAL_TYPE"/>
+        <result property="palGrade" column="PAL_GRADE"/>
+    </resultMap>
+    <resultMap id="MonsterDTOResultMap" type="pocketPal.common.model.dto.MonsterDTO">
+        <id property="palNo" column="PAL_NO"/>
+        <result property="palName" column="PAL_NAME"/>
+        <result property="palType" column="PAL_TYPE"/>
+        <result property="palGrade" column="PAL_GRADE"/>
+    </resultMap>
+    <resultMap id="PalDexDTOResultMap" type="pocketPal.common.model.dto.PalDexDTO">
+        <id property="palNo" column="PAL_NO"/>
+        <result property="palName" column="PAL_NAME"/>
+        <result property="palType" column="PAL_TYPE"/>
+        <result property="palGrade" column="PAL_GRADE"/>
+        <result property="discoveryTime" column="DISCOVERY_TIME"/>
+        <result property="catchCount" column="CATCH_COUNT"/>
+    </resultMap>
+
+    <select id="checkCatchPal" parameterType="string" resultMap="MonsterDTOResultMap">
+        SELECT *
+        FROM TBL_CATCH_PAL C
+            LEFT JOIN TBL_PAL P ON C.PAL_NO = P.PAL_NO
+        WHERE USER_ID = #{ userId }
+    </select>
+
+    <select id="checkPalType" parameterType="string" resultMap="MonsterDTOResultMap">
+        SELECT
+            *
+        FROM
+            TBL_PAL
+        WHERE
+            PAL_NO = #{ palNo }
+    </select>
+
+    <delete id="workPal" parameterType="hashMap">
+        DELETE FROM tbl_catch_pal
+        WHERE USER_ID = #{ userId }
+            AND PAL_NO = #{ palNo }
+        LIMIT 1
+    </delete>
+
+    <select id ="checkPalDexByUserId" parameterType="string" resultMap="PalDexDTOResultMap">
+        SELECT
+            *
+        FROM
+            TBL_PALDEX_BOOK AS PB
+        LEFT JOIN TBL_PAL AS P ON PB.PAL_NO = P.PAL_NO
+        WHERE
+            PB.USER_ID = #{ userId }
+        ORDER BY
+            PB.PAL_NO
+    </select>
+
+    <select id ="checkCatchPalByUserId" parameterType="string" resultMap="menuResultMap">
+        SELECT
+            CP.PAL_NO
+            ,P.PAL_NAME
+            ,P.PAL_TYPE
+            ,P.PAL_GRADE
+        FROM
+            TBL_CATCH_PAL AS CP
+        LEFT JOIN TBL_PAL AS P ON CP.PAL_NO = P.PAL_NO
+        WHERE
+            CP.USER_ID = #{ userId }
+        ORDER BY
+            CP.PAL_NO
+    </select>
+
+
+    <select id="checkHavenPal" parameterType="pocketPal.common.model.dto.UserDTO" resultMap="MonsterDTOResultMap">
+        SELECT P.PAL_NO, P.PAL_NAME, P.PAL_TYPE, P.PAL_GRADE
+        FROM TBL_PAL P
+        JOIN TBL_CATCH_PAL C
+        ON P.PAL_NO = C.PAL_NO
+        WHERE
+        C.USER_ID = #{ userId }
+    </select>
+    <select id="getRandomPalList" parameterType="hashMap" resultMap="MonsterDTOResultMap">
+        SELECT *
+        FROM TBL_PAL
+        WHERE PAL_GRADE = #{grade} AND (PAL_TYPE = #{type} OR PAL_TYPE = '빛')
+    </select>
+    <select id="getCatchChance" parameterType="pocketPal.common.model.dto.MonsterDTO" resultType="_int">
+        SELECT chance
+        FROM TBL_PAL_GRADE
+        WHERE PAL_GRADE = #{ palGrade }
+    </select>
+    <select id="getCatchCount" parameterType="hashMap" resultType="_int">
+        SELECT COUNT(*)
+        FROM TBL_CATCH_PAL
+        WHERE PAL_NO = #{ palNo }
+        AND USER_ID = #{ userId }
+    </select>
+    <insert id="insertNewPal" parameterType="hashMap">
+        INSERT INTO TBL_CATCH_PAL
+        (PAL_INDEX, PAL_NO, USER_ID)
+        VALUES
+        (null, #{ palNo }, #{ userId })
+    </insert>
+    <insert id="insertPalDex" parameterType="hashMap">
+        INSERT INTO TBL_PALDEX_BOOK
+        (PALDEX_NO, USER_ID, PAL_NO, DISCOVERY_TIME, CATCH_COUNT)
+        VALUES
+        (null, #{ userId }, #{ palNo }, NOW(), 1)
+    </insert>
+    <update id="increaseCatchCount" parameterType="hashMap">
+        UPDATE TBL_PALDEX_BOOK SET
+        CATCH_COUNT = #{ catchCount } + 1
+        WHERE
+        USER_ID = #{ userId }
+        AND PAL_NO = #{ palNo }
+    </update>
+</mapper>

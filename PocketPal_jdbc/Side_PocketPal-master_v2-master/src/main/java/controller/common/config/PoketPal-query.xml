@@ -1,0 +1,155 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no" ?>
+<!DOCTYPE properties SYSTEM "http://java.sun.com/dtd/properties.dtd">
+<properties>
+    <comment/>
+    <entry key="login">
+        SELECT
+            USER_ID,
+            USER_PWD,
+            USER_NAME
+        FROM
+            TBL_USER
+        WHERE
+            USER_ID = ? AND
+            USER_PWD = ?
+    </entry>
+    <entry key="register">
+        INSERT
+            INTO TBL_USER (
+                USER_ID,
+                USER_PWD,
+                USER_NAME
+        )
+        VALUES (?, ?, ?)
+    </entry>
+    <entry key="countCatchPal">
+        SELECT
+            count(*)
+        FROM
+            tbl_catch_pal
+        WHERE
+            user_id = ?
+    </entry>
+    <entry key="encounter">
+        SELECT
+            pal_no,
+            pal_name,
+            pal_type,
+            pal_grade
+        FROM
+            tbl_pal
+        WHERE
+            pal_grade = ? AND
+            PAL_TYPE = ?
+    </entry>
+    <entry key="encounterLegend">
+        SELECT
+            pal_no,
+            pal_name,
+            pal_type,
+            pal_grade
+        FROM
+            tbl_pal
+        WHERE
+            pal_grade = ?
+    </entry>
+    <entry key="probability">
+        SELECT
+            G.CHANCE
+        FROM
+            TBL_PAL P
+        LEFT JOIN TBL_PAL_GRADE G
+        ON P.PAL_GRADE = G.PAL_GRADE
+        WHERE
+            P.PAL_NO = ?
+    </entry>
+    <entry key="findPalByNo">
+        INSERT
+    </entry>
+    <entry key="catchCount">
+        SELECT
+            CATCH_COUNT
+        FROM
+            TBL_PALDEX_BOOK
+        WHERE
+            USER_ID = ? AND
+            PAL_NO = ?
+    </entry>
+    <entry key="insertPalDexBook">
+        INSERT
+            INTO TBL_PALDEX_BOOK (
+                PALDEX_NO,
+                USER_ID,
+                PAL_NO,
+                DISCOVERY_TIME,
+                CATCH_COUNT
+        )
+        VALUES (null, ? , ?, NOW(), 1)
+    </entry>
+    <entry key="updatePalDexBook">
+        UPDATE
+            TBL_PALDEX_BOOK
+        SET
+            CATCH_COUNT = ? + 1
+        WHERE
+            USER_ID = ? AND
+            PAL_NO = ?
+    </entry>
+    <entry key="insertCatchPal">
+        INSERT
+            INTO TBL_CATCH_PAL (
+                PAL_INDEX,
+                USER_ID,
+                PAL_NO
+        )
+        VALUES (null, ?, ?)
+    </entry>
+    <entry key="checkPalDex">
+        SELECT
+            PB.PAL_NO,
+            P.PAL_NAME,
+            PB.DISCOVERY_TIME,
+            PB.CATCH_COUNT
+        FROM
+            TBL_PALDEX_BOOK AS PB
+        LEFT JOIN TBL_PAL AS P ON PB.PAL_NO = P.PAL_NO
+        WHERE
+            PB.USER_ID = ?
+        ORDER BY
+            PB.PAL_NO
+    </entry>
+    <entry key="checkCatchPal">
+        SELECT
+            CP.PAL_NO,
+            P.PAL_NAME
+        FROM
+            TBL_CATCH_PAL AS CP
+            LEFT JOIN TBL_PAL AS P ON CP.PAL_NO = P.PAL_NO
+        WHERE
+            CP.USER_ID = ?
+        ORDER BY
+            CP.PAL_NO
+    </entry>
+    <entry key="workPal1">
+        SELECT
+            PAL_TYPE
+        FROM
+            TBL_PAL
+        WHERE
+            PAL_NAME = ?
+    </entry>
+    <entry key="workPal2">
+        DELETE FROM
+            TBL_CATCH_PAL
+        WHERE
+            PAL_NO IN
+                (SELECT
+                    PAL_NO
+                FROM
+                    TBL_PAL
+                WHERE
+                    PAL_NAME = ?)
+            AND USER_ID = ?
+        limit 1
+    </entry>
+</properties>
